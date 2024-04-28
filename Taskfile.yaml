@@ -1,0 +1,26 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GOK_NAME: hello
+  GREETING: Hello, World!
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+  gok_add:
+    cmds:
+      - gok add -i {{.GOK_NAME}} github.com/drummonds/gophoto
+
+  update:
+    cmds:
+      - CGO_ENABLED=0 GOARCH=arm64 gok -i hello update
+
+  local:
+    cmds:
+      - go run .
+
