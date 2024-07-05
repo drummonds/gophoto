@@ -63,29 +63,6 @@ func uptime() (string, error) {
 	return "", fmt.Errorf("BUG: parse /proc/uptime")
 }
 
-func scaleImage(bounds image.Rectangle, maxW, maxH int) image.Rectangle {
-	imgW := bounds.Max.X
-	imgH := bounds.Max.Y
-	ratio := float64(maxW) / float64(imgW)
-	if r := float64(maxH) / float64(imgH); r < ratio {
-		ratio = r
-	}
-	scaledW := int(ratio * float64(imgW))
-	scaledH := int(ratio * float64(imgH))
-	return image.Rect(0, 0, scaledW, scaledH)
-}
-
-var colorNameToRGBA = map[string]color.NRGBA{
-	"darkgray": color.NRGBA{R: 0x55, G: 0x57, B: 0x53},
-	"red":      color.NRGBA{R: 0xEF, G: 0x29, B: 0x29},
-	"green":    color.NRGBA{R: 0x8A, G: 0xE2, B: 0x34},
-	"yellow":   color.NRGBA{R: 0xFC, G: 0xE9, B: 0x4F},
-	"blue":     color.NRGBA{R: 0x72, G: 0x9F, B: 0xCF},
-	"magenta":  color.NRGBA{R: 0xEE, G: 0x38, B: 0xDA},
-	"cyan":     color.NRGBA{R: 0x34, G: 0xE2, B: 0xE2},
-	"white":    color.NRGBA{R: 0xEE, G: 0xEE, B: 0xEC},
-}
-
 type statusDrawer struct {
 	// config
 	img         draw.Image
@@ -134,7 +111,7 @@ func newStatusDrawer(img draw.Image) (*statusDrawer, error) {
 
 	// place the gopher in the top right half (centered)
 	borderTop := int(50 * scaleFactor)
-	gopherRect := scaleImage(gokrazyLogo.Bounds(), w/2, h/2-borderTop)
+	gopherRect := drawing.ScaleImage(gokrazyLogo.Bounds(), w/2, h/2-borderTop)
 	gopherRect = gopherRect.Add(image.Point{w / 2, 0})
 	padX := ((w / 2) - gopherRect.Size().X) / 2
 	padY := borderTop + ((h/2)-gopherRect.Size().Y)/2
@@ -326,7 +303,7 @@ func (d *statusDrawer) draw1(ctx context.Context) error {
 				for idx, field := range strings.Split(strings.TrimPrefix(colored, "$"), "$") {
 
 					if idx%2 == 0 {
-						col := colorNameToRGBA[field]
+						col := drawing.ColourNameToRGBA[field]
 						d.gstat.SetRGB255(int(col.R), int(col.G), int(col.B))
 					} else {
 						d.gstat.DrawString(field, statx, staty)
@@ -485,7 +462,9 @@ func fbstatus() error {
 	}
 }
 
-//go:embed "gokrazy.png"
+// gokrazy
+//
+//go:embed "P1120981.png"
 var gokrazyLogoPNG []byte
 
 func main() {
