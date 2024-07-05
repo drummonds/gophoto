@@ -27,7 +27,7 @@ import (
 	"image/draw"
 	"unsafe"
 
-	"github.com/gokrazy/fbstatus/internal/fbimage"
+	"github.com/drummonds/gophoto/internal/fbimage"
 	"golang.org/x/sys/unix"
 )
 

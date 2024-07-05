@@ -10,7 +10,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/gokrazy/fbstatus/internal/linuxvt"
+	"github.com/drummonds/gophoto/internal/linuxvt"
 	"golang.org/x/sys/unix"
 )
 
