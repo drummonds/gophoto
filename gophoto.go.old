@@ -1,0 +1,38 @@
+package main
+
+import (
+	"fmt"
+	"log/slog"
+	"net/http"
+	"os"
+)
+
+func main() {
+	slog.Info("Gophoto start V0.0.4")
+	testExtra()
+	http.HandleFunc("/", HelloServer)
+	// http.HandleFunc("/", index_handler)
+	// http.HandleFunc("/about/", about_handler)
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
+	http.ListenAndServe(":8080", nil)
+
+}
+
+func HelloServer(w http.ResponseWriter, r *http.Request) {
+	// MAIN SECTION HTML CODE
+	fmt.Fprintf(w, "")
+	fmt.Fprintf(w, "<h1>Hello, %s! from gophoto</h1>", r.URL.Path[1:])
+	fmt.Fprintf(w, "<title>FrameBuffer</title>")
+	fmt.Fprintf(w, "<img src='assets/fit_2048.jpeg' alt='UncleHugo' style='width:800px;'>")
+}
+
+func testExtra() {
+	slog.Info("Getting env name ALBUM_NAME")
+	variable, exists := os.LookupEnv("ALBUM_NAME")
+	if exists {
+		slog.Info("Test existence", variable, exists)
+	} else {
+		slog.Debug("Test existence", variable, exists)
+
+	}
+}

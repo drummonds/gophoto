@@ -15,6 +15,7 @@ tasks:
   gok_add:
     cmds:
       - gok add -i {{.GOK_NAME}} github.com/drummonds/gophoto
+      # - gok add -i {{.GOK_NAME}} /home/hum3/minor_projects/gophoto
 
   update:
     cmds:
