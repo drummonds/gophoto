@@ -36,14 +36,13 @@ import (
 
 type PictureFrame struct {
 	// config
-	devFrameBuffer draw.Image
-	bounds         image.Rectangle
-	w, h           int
-	scaleFactor    float64
-	buffer         *image.RGBA // This is what is output to the screen via the frame buffer
-	bgcolor        color.RGBA
-	g              *gg.Context
-	picture        *panel.ImagePanel
+	bounds      image.Rectangle
+	w, h        int
+	scaleFactor float64
+	buffer      *image.RGBA // This is what is output to the screen via the frame buffer
+	bgcolor     color.RGBA
+	g           *gg.Context
+	picture     *panel.ImagePanel
 
 	// state
 	slowPathNotified     bool
