@@ -1,5 +1,5 @@
 /*
-A screen represents a complete rectangular area which presents data.  
+A screen represents a complete rectangular area which presents data.
 
 This might be a frame buffer or background image.
 
@@ -12,58 +12,68 @@ This is done it two stages:
 package frame
 
 import (
-	"bytes"
-	"fmt"
 	"image"
-	"os"
 
 	"image/color"
 	"image/draw"
-	"image/png"
 
 	_ "embed"
 	_ "image/png"
-	"github.com/drummonds/gophoto/internal/panel"
+)
+
+type Panelled interface {
+	Render(buffer *image.RGBA)
 }
 
 // This is the structure which holds the screen data.
 type PictureFrame struct {
 	// config
-	bounds         image.Rectangle
-	w, h           int
-	scaleFactor    float64
-	buffer         *image.RGBA // This is what is output to the screen via the frame buffer
-	bgcolor        color.RGBA
-	panels []*panel.Panel;
+	Bounds      image.Rectangle
+	W, H        int
+	scaleFactor float64
+	Buffer      *image.RGBA // This is what is output to the screen via the frame buffer
+	BGColour    color.RGBA
+	panels      []Panelled
 }
 
 // Create a new picture frame at a defined size, eg defined by browser window
 // for frame size
-func NewPlainPictureFrame(bounds image.Rectangle) *PictureFrame {
+func NewPictureFrame(bounds image.Rectangle) *PictureFrame {
 	pf := new(PictureFrame)
-	pf.bounds = bounds
-	w := pf.bounds.Max.X
-	h := pf.bounds.Max.Y
-	pf.bgcolor = color.RGBA{R: 0xF4, G: 0xC7, B: 0xDF, A: 255}
+	pf.Bounds = bounds
+	pf.W = pf.Bounds.Max.X
+	pf.H = pf.Bounds.Max.Y
+	pf.BGColour = color.RGBA{R: 0xF4, G: 0xC7, B: 0xDF, A: 255}
 	// Create intermediate buffer
-	pf.buffer = image.NewRGBA(pf.bounds)
-	draw.Draw(pf.buffer, pf.bounds, &image.Uniform{pf.bgcolor}, image.Point{}, draw.Src)
-	pf.panels = make([]*panel.Panel, 0, 5)
-		// Fill buffer background
+	pf.Buffer = image.NewRGBA(pf.Bounds)
+	pf.RepaintBackground()
+	pf.panels = make([]Panelled, 0, 5)
+	// Fill buffer background
 
 	return pf
 }
 
-func (pf *PictureFrame) AddPanel(panel *panel.PanelFrame) err error {
-	pf.panels = pf.panels.append(panel)
+func (pf *PictureFrame) SetBGColour(r, g, b uint8) {
+	pf.BGColour = color.RGBA{R: r, G: g, B: b, A: 255}
+	pf.RepaintBackground()
+}
+
+func (pf *PictureFrame) RepaintBackground() {
+	draw.Draw(pf.Buffer, pf.Bounds, &image.Uniform{pf.BGColour}, image.Point{}, draw.Src)
+}
+
+func (pf *PictureFrame) AddPanel(panel Panelled) error {
+	pf.panels = append(pf.panels, panel)
 	return nil
 }
 
 // Calls all the child panels to rerender them
-func (pf *PictureFrame) Render() err error {
-	for _,panel := range pf.panels {
-		panel.Render()
+func (pf *PictureFrame) Render() error {
+	for _, panel := range pf.panels {
+		// Recreate panel content if changed
+		panel.Render(pf.Buffer)
+		// apply panel content to buffer
+		// pf.picture.Render(pf.buffer, photoRect)
 	}
-	pf.panels = pf.panels.append(panel)
 	return nil
 }

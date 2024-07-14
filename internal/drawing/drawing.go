@@ -69,8 +69,10 @@ func CopyRGBAtoBGRA(dst *fbimage.BGRA, src *image.RGBA) {
 }
 
 // Calculated linear scaling of an rectangle from its original size to
-// a max width and max height of a desired output
-func ScaleImage(bounds image.Rectangle, maxW, maxH int) image.Rectangle {
+// a max width and max height of a desired output.
+// The whole picture is scaled inside the rectangle with blank space to
+// right and top
+func ScaleImageInside(bounds image.Rectangle, maxW, maxH int) image.Rectangle {
 	imgW := bounds.Max.X
 	imgH := bounds.Max.Y
 	ratio := float64(maxW) / float64(imgW)
@@ -80,6 +82,39 @@ func ScaleImage(bounds image.Rectangle, maxW, maxH int) image.Rectangle {
 	scaledW := int(ratio * float64(imgW))
 	scaledH := int(ratio * float64(imgH))
 	return image.Rect(0, 0, scaledW, scaledH)
+}
+
+type AnchorSides int64
+
+const (
+	Bottom AnchorSides = iota
+	Top
+	Left
+	Right
+	Centre
+)
+
+// Calculated linear scaling of an rectangle from its original size to
+// a max width and max height of a desired output.
+// The whole picture is scaled inside the rectangle with blank space to
+// right and top
+func ScaleImageOuter(bounds image.Rectangle, maxW, maxH int, anchor AnchorSides) image.Rectangle {
+	imgW := bounds.Max.X
+	imgH := bounds.Max.Y
+	ratio := float64(maxH) / float64(imgH)
+	if r := float64(maxW) / float64(imgW); r < ratio {
+		ratio = r
+	}
+	scaledW := int(ratio * float64(imgW))
+	scaledH := int(ratio * float64(imgH))
+	top := 0
+	left := 0
+	switch anchor {
+	case Bottom:
+		left = (imgW - scaledW) / 2
+		top = -(scaledH - imgH)
+	}
+	return image.Rect(top, left, scaledW, scaledH)
 }
 
 var ColourNameToRGBA = map[string]color.NRGBA{

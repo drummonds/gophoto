@@ -10,25 +10,16 @@ import (
 	"image"
 	"os"
 
-	"image/color"
 	"image/draw"
 	"image/png"
 
 	_ "embed"
 	_ "image/png"
 
+	"github.com/drummonds/gophoto/internal/drawing"
 	"github.com/drummonds/gophoto/internal/frame"
 	"github.com/drummonds/gophoto/internal/panel"
 )
-
-type PictureFrame struct {
-	devFrameBuffer draw.Image      // This is the end frame buffer (turned into PNG)
-	bounds         image.Rectangle // this is the size of frame buffer and the intermediate buffer
-	bgcolor        color.RGBA
-
-	buffer  *image.RGBA //This is the intermediate buffer which is drawn on
-	picture *panel.ImagePanel
-}
 
 //go:embed "P1120981.png"
 var displayPhotoPNG []byte
@@ -39,25 +30,26 @@ func main() {
 
 	pf := frame.NewPictureFrame(mockFrameBuffer.Bounds())
 
-	// borderTop := 30
-	// margin := 20
+	borderTop := 30
+	margin := 20
 	// get the main image
 	displayPhoto, _, err := image.Decode(bytes.NewReader(displayPhotoPNG))
 	if err != nil {
 		panic("Can't find photo")
 	}
-	pf.AddPanel(displayPhoto)
+	picture := panel.NewImagePanel(displayPhoto)
+	// picture.Resize ( pf.W-margin*2, pf.H-borderTop-margin*2,
+	photoRect := drawing.ScaleImageInside(displayPhoto.Bounds(), pf.W-margin*2, pf.H-borderTop-margin*2)
+	// Now move image to center
+	padX := margin + (pf.W-photoRect.Size().X)/2
+	padY := borderTop + ((pf.H-borderTop)-photoRect.Size().Y)/2
+	picture.Location = photoRect.Add(image.Point{padX, padY})
+	pf.AddPanel(picture)
+	// pf.SetBGColour(0xF4, 0xC7, 0xDF)
 
-	// pf.picture = panel.NewImagePanel(w-margin*2, h-borderTop-margin*2, displayPhoto)
-	// // place the photo in the bottom (centered)
-	// photoRect := drawing.ScaleImage(displayPhoto.Bounds(), w-margin*2, h-borderTop-margin*2)
-	// // Now move image to center
-	// padX := margin + (w-photoRect.Size().X)/2
-	// padY := borderTop + ((h-borderTop)-photoRect.Size().Y)/2
-	// photoRect = photoRect.Add(image.Point{padX, padY})
-	// pf.picture.Render(pf.buffer, photoRect)
 	// Copy intermediate buffer to frame buffer
-	draw.Draw(mockFrameBuffer, pf.bounds, pf.buffer, image.Point{}, draw.Src)
+	pf.Render()
+	draw.Draw(mockFrameBuffer, pf.Bounds, pf.Buffer, image.Point{}, draw.Src)
 	// Encode frame buffer as PNG and save
 	f, _ := os.Create("framebuffer.png")
 	png.Encode(f, mockFrameBuffer)
