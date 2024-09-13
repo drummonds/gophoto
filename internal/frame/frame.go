@@ -29,11 +29,11 @@ type Panelled interface {
 type PictureFrame struct {
 	// config
 	Bounds      image.Rectangle
-	W, H        int
 	scaleFactor float64
 	Buffer      *image.RGBA // This is what is output to the screen via the frame buffer
 	BGColour    color.RGBA
 	panels      []Panelled
+	CropPoint   image.Point
 }
 
 // Create a new picture frame at a defined size, eg defined by browser window
@@ -41,15 +41,11 @@ type PictureFrame struct {
 func NewPictureFrame(bounds image.Rectangle) *PictureFrame {
 	pf := new(PictureFrame)
 	pf.Bounds = bounds
-	pf.W = pf.Bounds.Max.X
-	pf.H = pf.Bounds.Max.Y
-	pf.BGColour = color.RGBA{R: 0xF4, G: 0xC7, B: 0xDF, A: 255}
+	pf.BGColour = color.RGBA{R: 0x94, G: 0x6F, B: 0x22, A: 255}
 	// Create intermediate buffer
 	pf.Buffer = image.NewRGBA(pf.Bounds)
 	pf.RepaintBackground()
 	pf.panels = make([]Panelled, 0, 5)
-	// Fill buffer background
-
 	return pf
 }
 
@@ -68,7 +64,7 @@ func (pf *PictureFrame) AddPanel(panel Panelled) error {
 }
 
 // Calls all the child panels to rerender them
-func (pf *PictureFrame) Render() error {
+func (pf *PictureFrame) RenderPanels() error {
 	for _, panel := range pf.panels {
 		// Recreate panel content if changed
 		panel.Render(pf.Buffer)

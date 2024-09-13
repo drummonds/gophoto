@@ -4,19 +4,39 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
-            "name": "Panel Demo",
-            "type": "go",
-            "request": "launch",
-            "mode": "auto",
-            "program": "${workspaceFolder}/cmd/paneldemo/paneldemo.go"
-        },
-        {
-            "name": "Launch Package",
-            "type": "go",
-            "request": "launch",
-            "mode": "auto",
-            "program": "${fileDirname}"
+
+      {
+        "name": "Panel Demo",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${workspaceFolder}/cmd/paneldemo/paneldemo.go"
+      },
+      {
+        "name": "Prism Demo",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${workspaceFolder}/cmd/prisimdemo/prisimdemo.go",
+        "env": {
+          "PHOTOPRISM_HOST": "http://10.0.0.1:2342",
+          "PHOTOPRISM_USER": "admin",
+          "PHOTOPRISM_PW": "adminadmin"
         }
+      },
+       {
+        "name": "X11 demo",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${workspaceFolder}/cmd/x11Demo/x11Demo.go"
+      },
+     {
+        "name": "Launch Package",
+        "type": "go",
+        "request": "launch",
+        "mode": "debug",
+        "program": "${fileDirname}"
+      }
     ]
 }

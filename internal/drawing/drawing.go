@@ -84,37 +84,35 @@ func ScaleImageInside(bounds image.Rectangle, maxW, maxH int) image.Rectangle {
 	return image.Rect(0, 0, scaledW, scaledH)
 }
 
-type AnchorSides int64
-
-const (
-	Bottom AnchorSides = iota
-	Top
-	Left
-	Right
-	Centre
-)
-
 // Calculated linear scaling of an rectangle from its original size to
 // a max width and max height of a desired output.
 // The whole picture is scaled inside the rectangle with blank space to
-// right and top
-func ScaleImageOuter(bounds image.Rectangle, maxW, maxH int, anchor AnchorSides) image.Rectangle {
+// right and top.  It is assumed the image is not rescaled when it is drawn
+//
+// Parameters
+// - bounds is the size of the image
+// - maxW and maxH is frame size needs to be mapped to
+// - anchor which side of picture is to be anchored (might be better as a point)
+func ScaleImageOuter(bounds image.Rectangle, target, clip image.Point) image.Rectangle {
 	imgW := bounds.Max.X
 	imgH := bounds.Max.Y
-	ratio := float64(maxH) / float64(imgH)
-	if r := float64(maxW) / float64(imgW); r < ratio {
-		ratio = r
-	}
+	// Ratio of screen to image, <1 means reduce image
+	ratioH := float64(target.Y) / float64(imgH)
+	ratioW := float64(target.X) / float64(imgW)
+	var ratio float64
 	scaledW := int(ratio * float64(imgW))
 	scaledH := int(ratio * float64(imgH))
 	top := 0
 	left := 0
-	switch anchor {
-	case Bottom:
-		left = (imgW - scaledW) / 2
-		top = -(scaledH - imgH)
+	switch {
+	case ratioH > ratioW: // Scaling to expand width
+		ratio = ratioH
+		left += clip.X + (imgW-scaledW)/2
+	case ratioW > ratioH: // Scaling to expand height
+		ratio = ratioW
+		top += clip.Y + (imgH-scaledH)/2
 	}
-	return image.Rect(top, left, scaledW, scaledH)
+	return image.Rect(left, top, scaledW+left, scaledH+top)
 }
 
 var ColourNameToRGBA = map[string]color.NRGBA{

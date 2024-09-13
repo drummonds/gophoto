@@ -8,8 +8,8 @@
 package main
 
 import (
-	"bytes"
 	"context"
+	"fmt"
 	"image"
 	"image/draw"
 	"log"
@@ -23,7 +23,6 @@ import (
 	"github.com/drummonds/gophoto/internal/fb"
 	"github.com/drummonds/gophoto/internal/fbimage"
 	"github.com/drummonds/gophoto/internal/frame"
-	"github.com/drummonds/gophoto/internal/panel"
 
 	_ "embed"
 	_ "image/png"
@@ -41,52 +40,22 @@ type ConsolePicture struct {
 	renderCount          int
 }
 
-func setupBoundedStaticImage(cp *ConsolePicture) {
-	borderTop := 30
-	margin := 20
-	// get the main image
-	displayPhoto, _, err := image.Decode(bytes.NewReader(displayPhotoPNG))
-	if err != nil {
-		panic("Can't find photo")
-	}
-	picture := panel.NewImagePanel(displayPhoto)
-	// picture.Resize ( pf.W-margin*2, pf.H-borderTop-margin*2,
-	photoRect := drawing.ScaleImageInside(displayPhoto.Bounds(), cp.pf.W-margin*2, cp.pf.H-borderTop-margin*2)
-	// Now move image to center
-	padX := margin + (cp.pf.W-photoRect.Size().X)/2
-	padY := borderTop + ((cp.pf.H-borderTop)-photoRect.Size().Y)/2
-	picture.Location = photoRect.Add(image.Point{padX, padY})
-	cp.pf.AddPanel(picture)
-	// pf.SetBGColour(0xF4, 0xC7, 0xDF)
-}
-
-func setupFullStaticImage(cp *ConsolePicture) {
-	// get the main image
-	displayPhoto, _, err := image.Decode(bytes.NewReader(displayPhotoPNG))
-	if err != nil {
-		panic("Can't find photo")
-	}
-	picture := panel.NewImagePanel(displayPhoto)
-	// picture.Resize ( pf.W-margin*2, pf.H-borderTop-margin*2,
-	photoRect := drawing.ScaleImageOuter(displayPhoto.Bounds(), cp.pf.W, cp.pf.H, drawing.Bottom)
-	// Now move image to center
-	picture.Location = photoRect.Add(image.Point{0, 0})
-	cp.pf.AddPanel(picture)
-}
-
+// Called once to set up newConsole
 func newConsolePicture(devFrameBuffer draw.Image) (*ConsolePicture, error) {
 	cp := new(ConsolePicture)
 	cp.frameBuffer = devFrameBuffer
 
 	cp.pf = frame.NewPictureFrame(cp.frameBuffer.Bounds())
 
-	// setupBoundedStaticImage(cp)
-	setupFullStaticImage(cp)
+	// cp.pf.SetupBoundedStaticImage()
+	// cp.pf.SetupFullStaticImage()
+	cp.pf.SetupFullPhotoPrism()
 
 	return cp, nil
 }
 
 // repaint any live panels to buffer
+// Call rerender
 func (cp *ConsolePicture) render(ctx context.Context) error {
 	cp.renderCount += 1
 	// copy buffer to screen
@@ -188,12 +157,8 @@ func gophoto(ctx context.Context) error {
 	}
 }
 
-// gokrazy
-//
-//go:embed "P1120981.png"
-var displayPhotoPNG []byte
-
 func main() {
+	fmt.Printf("GoPhoto V0.2.0 2024-09-07")
 	ctx := context.Background()
 
 	// Cancel the context instead of exiting the program:
