@@ -28,7 +28,7 @@ func main() {
 
 	// pf.SetupBoundedStaticImage()
 	pf.SetupFullStaticImage()
-	// pf.SetupFullPhotoPrism()
+	// err = pf.SetupFullPhotoPrism()
 
 	// Copy intermediate buffer to frame buffer
 	pf.RenderPhotoPrism()

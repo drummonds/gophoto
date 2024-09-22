@@ -1,4 +1,5 @@
 # gophoto
+
 GoKrazy picture frame
 
 Shows pictures from various sources eg photoprism album
@@ -17,3 +18,11 @@ paneldemo.go produces a demo panel as a png
 - Show on framebuffer
 - Get image from photoprism
     - photoprism in gocrazy
+
+## Notes
+
+### Raspberry Pi power supply
+
+The Raspberry Pi on an inadequte power supply will cause the Pi to brownout and reset.
+
+- 
