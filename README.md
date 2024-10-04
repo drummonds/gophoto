@@ -33,6 +33,8 @@ Want:
 - Make transition easier
 - colocate photoprism and DB
 - use cockroach db on same box?
+- auto find photoprism
+
 
 
 ## Notes
