@@ -32,9 +32,9 @@ import (
 )
 
 type Device struct {
-	fd    uintptr
+	Fd    uintptr
 	mmap  []byte
-	finfo FixScreeninfo
+	FInfo FixScreeninfo
 }
 
 func Open(dev string) (*Device, error) {
@@ -46,15 +46,15 @@ func Open(dev string) (*Device, error) {
 		unix.Close(fd)
 		return nil, errors.New("fd overflows")
 	}
-	d := &Device{fd: uintptr(fd)}
+	d := &Device{Fd: uintptr(fd)}
 
-	_, _, eno := unix.Syscall(unix.SYS_IOCTL, d.fd, FBIOGET_FSCREENINFO, uintptr(unsafe.Pointer(&d.finfo)))
+	_, _, eno := unix.Syscall(unix.SYS_IOCTL, d.Fd, FBIOGET_FSCREENINFO, uintptr(unsafe.Pointer(&d.FInfo)))
 	if eno != 0 {
 		unix.Close(fd)
 		return nil, fmt.Errorf("FBIOGET_FSCREENINFO: %v", eno)
 	}
 
-	d.mmap, err = unix.Mmap(fd, 0, int(d.finfo.Smem_len), unix.PROT_READ|unix.PROT_WRITE, unix.MAP_SHARED)
+	d.mmap, err = unix.Mmap(fd, 0, int(d.FInfo.Smem_len), unix.PROT_READ|unix.PROT_WRITE, unix.MAP_SHARED)
 	if err != nil {
 		unix.Close(fd)
 		return nil, fmt.Errorf("mmap: %v", err)
@@ -64,7 +64,7 @@ func Open(dev string) (*Device, error) {
 
 func (d *Device) VarScreeninfo() (VarScreeninfo, error) {
 	var vinfo VarScreeninfo
-	_, _, eno := unix.Syscall(unix.SYS_IOCTL, d.fd, FBIOGET_VSCREENINFO, uintptr(unsafe.Pointer(&vinfo)))
+	_, _, eno := unix.Syscall(unix.SYS_IOCTL, d.Fd, FBIOGET_VSCREENINFO, uintptr(unsafe.Pointer(&vinfo)))
 	if eno != 0 {
 		return vinfo, fmt.Errorf("FBIOGET_VSCREENINFO: %v", eno)
 	}
@@ -91,7 +91,7 @@ func (d *Device) Image() (draw.Image, error) {
 		if !visual.In(virtual) {
 			return nil, errors.New("visual resolution not contained in virtual resolution")
 		}
-		stride := int(d.finfo.Line_length)
+		stride := int(d.FInfo.Line_length)
 
 		return &fbimage.BGRA{
 			Pix:    d.mmap,
@@ -115,7 +115,7 @@ func (d *Device) Image() (draw.Image, error) {
 		if !visual.In(virtual) {
 			return nil, errors.New("visual resolution not contained in virtual resolution")
 		}
-		stride := int(d.finfo.Line_length)
+		stride := int(d.FInfo.Line_length)
 
 		if vinfo.Grayscale == 1 {
 			return &image.Gray16{
@@ -137,7 +137,7 @@ func (d *Device) Image() (draw.Image, error) {
 
 func (d *Device) Close() error {
 	e1 := unix.Munmap(d.mmap)
-	if e2 := unix.Close(int(d.fd)); e2 != nil {
+	if e2 := unix.Close(int(d.Fd)); e2 != nil {
 		return e2
 	}
 	return e1

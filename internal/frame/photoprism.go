@@ -8,7 +8,6 @@ import (
 	"image"
 	"image/jpeg"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
@@ -17,6 +16,21 @@ import (
 	"github.com/drummonds/gophoto/internal/panel"
 	"github.com/drummonds/photoprism-go-api/api"
 	"golang.org/x/image/draw"
+)
+
+type Page struct {
+	Title      string
+	ImageName  string
+	Body       []byte
+	Clock      string
+	PhotoIndex int
+	Client     *api.ClientWithResponses
+}
+
+var (
+	GlobalPage        = Page{Title: "Album show", ImageName: "TBC"}
+	GlobalPhotoList   []string
+	GlobalPhotoIDChan = make(chan string, 20)
 )
 
 func GetClient() (*api.ClientWithResponses, error) {
@@ -79,9 +93,55 @@ func NewImage(ctx context.Context, bounds image.Rectangle) (image.Image, error) 
 	}
 	log.Printf("got raw image")
 	// handle scaling to mock frame buffer
-	img := ScaleImage(rawImg, bounds, false)
+	img := ScaleImage(rawImg, bounds, true)
 	log.Printf("Scaled image")
 	return img, err
+}
+
+// Fill channels with photo ids.  Keep going until context is cancelled
+// use channel to slow down the process
+// Once album is exhausted it restarts at the begining
+func FillPhotoIDChan(ctx context.Context) {
+	var albumUid string
+	albumUid = os.Getenv("ALBUM_UID")
+	log.Printf("FillPhotoIDChan start filling photo chan for album %s", albumUid)
+
+	offset := 0
+	statusErrorCount := 0
+out:
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("Done filling photo id chan")
+			break out
+		default:
+			// Get photos from album
+			photoParams := api.SearchPhotosParams{Count: 20, Offset: &offset, S: &albumUid}
+			photos, err := GlobalPage.Client.SearchPhotosWithResponse(ctx, &photoParams)
+			if err != nil {
+				log.Printf("Error getting photos %v", err)
+				break out
+			}
+			if photos.HTTPResponse.StatusCode != 200 {
+				statusErrorCount++
+				if statusErrorCount > 10 {
+					log.Printf("Return 10 HTTP errors so exit")
+					break out
+				}
+			} else {
+				statusErrorCount = 0
+				for _, photo := range *photos.JSON200 {
+					GlobalPhotoIDChan <- *photo.UID // implicit wait
+				}
+				if len(*photos.JSON200) < 20 {
+					offset = 0 // Start again from begining
+				} else {
+					offset += 20
+				}
+			}
+		}
+	}
+	close(GlobalPhotoIDChan)
 }
 
 // Search for first album
@@ -130,8 +190,8 @@ func GetImage(ctx context.Context) (image.Image, error) {
 	)
 	log.Printf("GetImage")
 	// Get photo Id
-	uid := GlobalPhotoList[GlobalPage.PhotoIndex]
-	log.Printf("GetImage uid = %s, index = %v", uid, GlobalPage.PhotoIndex)
+	// uid := GlobalPhotoList[GlobalPage.PhotoIndex]
+	uid := <-GlobalPhotoIDChan
 	// Get details by search
 	// SearchPhotosWithResponse(ctx context.Context, params *SearchPhotosParams, reqEditors ...RequestEditorFn) (*SearchPhotosResponse, error)
 
@@ -185,7 +245,7 @@ func GetImage(ctx context.Context) (image.Image, error) {
 	log.Printf("Got download")
 	rawImg, err := jpeg.Decode(bytes.NewReader(body))
 	if err != nil {
-		return blank, fmt.Errorf("error decoding JPEG: %v", err)
+		return blank, fmt.Errorf("error decoding %s JPEG: %v", uid, err)
 	}
 	log.Printf("Decoded download")
 
@@ -221,24 +281,6 @@ func GetImage(ctx context.Context) (image.Image, error) {
 	return oriented, nil
 }
 
-type Page struct {
-	Title      string
-	ImageName  string
-	Body       []byte
-	Clock      string
-	PhotoIndex int
-	Client     *api.ClientWithResponses
-}
-
-var (
-	GlobalPage      = Page{Title: "Album show", ImageName: "TBC"}
-	GlobalPhotoList []string
-)
-
-func imageHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-
 // Setup pictures to pull
 func NewPhotoPrism(ctx context.Context) (err error) {
 	log.Printf("Get client %s\n", time.Now().Format(time.RFC3339))
@@ -247,7 +289,8 @@ func NewPhotoPrism(ctx context.Context) (err error) {
 		return err
 	}
 	log.Printf("Get photolist %s\n", time.Now().Format(time.RFC3339))
-	GlobalPhotoList, err = GetPhotoList(ctx)
+	// GlobalPhotoList, err = GetPhotoList(ctx)  // only 20
+	go FillPhotoIDChan(ctx)
 	log.Printf("Got photolist %s, err = %+v\n", time.Now().Format(time.RFC3339), err)
 	return err
 }

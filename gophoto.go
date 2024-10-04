@@ -23,6 +23,7 @@ import (
 	"github.com/drummonds/gophoto/internal/fb"
 	"github.com/drummonds/gophoto/internal/fbimage"
 	"github.com/drummonds/gophoto/internal/frame"
+	"github.com/drummonds/gophoto/internal/web"
 	"github.com/go-ping/ping"
 
 	_ "embed"
@@ -165,7 +166,7 @@ func gophoto(ctx context.Context) error {
 	for {
 		if cons.Visible() {
 			if err := ConsolePicture.render(ctx); err != nil {
-				return err
+				log.Printf("Failed to render %+v", err)
 			}
 		}
 		log.Printf("Start sleep")
@@ -186,7 +187,6 @@ func gophoto(ctx context.Context) error {
 
 func fatalExit(err error) {
 	// time.Sleep(30 * time.Second) // Don't hammer it with crashes
-	log.Printf("(fmt) Fatal error - won't return.\n%+v", err)
 	log.Printf("(log) Fatal error - won't return.\n%+v", err)
 	os.Exit(125) // Don;t rerun
 }
@@ -212,14 +212,14 @@ func pingPhotoPrism() {
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
-			fatalExit(fmt.Errorf("Recovered in f %+v", r))
+			fatalExit(fmt.Errorf("recovered in f %+v", r))
 		}
 	}()
-	version := "GoPhoto V0.2.22"
-	time.Sleep(5 * time.Second) // log not ready immed?
-	log.Printf("%s 2024-09-22 %s\n", version, time.Now().Format(time.RFC3339))
-	time.Sleep(5 * time.Second)
-	log.Printf("Finished sleep %s\n", time.Now().Format(time.RFC3339))
+	version := "GoPhoto V0.5.3"
+	log.Printf("Version %s ", version)
+	go web.StartWebServer()
+	time.Sleep(5 * time.Second) // Without a sleep the network is not up 2 secs not long enough
+	log.Printf("Finished sleep")
 	if err := enableUnprivilegedPing(); err != nil {
 		fatalExit(err)
 	}

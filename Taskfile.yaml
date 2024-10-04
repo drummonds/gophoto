@@ -4,13 +4,8 @@ version: '3'
 
 vars:
   GOK_NAME: hello
-  GREETING: Hello, World!
 
 tasks:
-  default:
-    cmds:
-      - echo "{{.GREETING}}"
-    silent: true
 
   gok_add:
     cmds:
@@ -19,9 +14,12 @@ tasks:
 
   update:
     cmds:
-      - CGO_ENABLED=0 GOARCH=arm64 gok -i hello update
+      - CGO_ENABLED=0 GOARCH=arm64 gok -i {{.GOK_NAME}} update
 
   local:
     cmds:
       - go run .
 
+  build:
+    cmds:
+      - CGO_ENABLED=0 GOARCH=arm64 gok -i hello overwrite --full x.img --target_storage_bytes=1258299392
