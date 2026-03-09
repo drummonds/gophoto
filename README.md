@@ -44,4 +44,11 @@ Want:
 The Raspberry Pi on an inadequte power supply will cause the Pi to brownout and reset.  Using the
 Raspberry Pi 5 on the Raspberry pi psu is rock solid so far.
 
-- 
+## Links
+
+| | |
+|---|---|
+| Documentation | https://h3-gophoto.statichost.page/ |
+| Source (Codeberg) | https://codeberg.org/hum3/gophoto |
+| Mirror (GitHub) | https://github.com/drummonds/gophoto |
+| Docs repo | https://codeberg.org/hum3/gophoto-docs |
