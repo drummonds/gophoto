@@ -10,7 +10,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/drummonds/gophoto/internal/linuxvt"
+	"codeberg.org/hum3/gophoto/internal/linuxvt"
 	"golang.org/x/sys/unix"
 )
 

@@ -18,12 +18,12 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/drummonds/gophoto/internal/console"
-	"github.com/drummonds/gophoto/internal/drawing"
-	"github.com/drummonds/gophoto/internal/fb"
-	"github.com/drummonds/gophoto/internal/fbimage"
-	"github.com/drummonds/gophoto/internal/frame"
-	"github.com/drummonds/gophoto/internal/web"
+	"codeberg.org/hum3/gophoto/internal/console"
+	"codeberg.org/hum3/gophoto/internal/drawing"
+	"codeberg.org/hum3/gophoto/internal/fb"
+	"codeberg.org/hum3/gophoto/internal/fbimage"
+	"codeberg.org/hum3/gophoto/internal/frame"
+	"codeberg.org/hum3/gophoto/internal/web"
 	"github.com/go-ping/ping"
 
 	_ "embed"

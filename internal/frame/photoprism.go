@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/disintegration/gift"
-	"github.com/drummonds/gophoto/internal/drawing"
-	"github.com/drummonds/gophoto/internal/panel"
+	"codeberg.org/hum3/gophoto/internal/drawing"
+	"codeberg.org/hum3/gophoto/internal/panel"
 	"github.com/drummonds/photoprism-go-api/api"
 	"golang.org/x/image/draw"
 )

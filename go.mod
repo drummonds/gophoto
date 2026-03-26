@@ -1,4 +1,4 @@
-module github.com/drummonds/gophoto
+module codeberg.org/hum3/gophoto
 
 go 1.22.2
 

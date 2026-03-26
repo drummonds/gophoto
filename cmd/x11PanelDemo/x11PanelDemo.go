@@ -10,7 +10,7 @@ import (
 
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
-	"github.com/drummonds/gophoto/internal/frame"
+	"codeberg.org/hum3/gophoto/internal/frame"
 	"golang.org/x/image/draw"
 )
 

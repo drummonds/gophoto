@@ -51,4 +51,3 @@ Raspberry Pi 5 on the Raspberry pi psu is rock solid so far.
 | Documentation | https://h3-gophoto.statichost.page/ |
 | Source (Codeberg) | https://codeberg.org/hum3/gophoto |
 | Mirror (GitHub) | https://github.com/drummonds/gophoto |
-| Docs repo | https://codeberg.org/hum3/gophoto-docs |

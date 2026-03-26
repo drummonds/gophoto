@@ -5,7 +5,7 @@ import (
 	"image/color"
 	_ "net/http/pprof"
 
-	"github.com/drummonds/gophoto/internal/fbimage"
+	"codeberg.org/hum3/gophoto/internal/fbimage"
 
 	_ "embed"
 	_ "image/png"
