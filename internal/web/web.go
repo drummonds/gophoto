@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"codeberg.org/hum3/gophoto/internal/fb"
+	"git.bytestone.uk/hum3/gophoto/internal/fb"
 	"golang.org/x/sys/unix"
 )
 

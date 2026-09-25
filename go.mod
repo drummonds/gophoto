@@ -1,4 +1,4 @@
-module codeberg.org/hum3/gophoto
+module git.bytestone.uk/hum3/gophoto
 
 go 1.22.2
 

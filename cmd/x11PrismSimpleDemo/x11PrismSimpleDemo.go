@@ -12,9 +12,9 @@ import (
 	"log"
 	"time"
 
+	"git.bytestone.uk/hum3/gophoto/internal/frame"
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
-	"codeberg.org/hum3/gophoto/internal/frame"
 )
 
 const (
@@ -33,7 +33,7 @@ func handleExposeEvent(ctx context.Context, X *xgb.Conn, wid xproto.Window, mock
 			r, g, b, _ := c.RGBA()
 			color := (r >> 8 << 16) | (g >> 8 << 8) | (b >> 8)
 			xproto.ChangeGC(X, gc, xproto.GcForeground, []uint32{uint32(color)})
-			xproto.PolyPoint(X, xproto.CoordModeOrigin, xproto.Drawable(wid), gc, []xproto.Point{{int16(x), int16(y)}})
+			xproto.PolyPoint(X, xproto.CoordModeOrigin, xproto.Drawable(wid), gc, []xproto.Point{{X: int16(x), Y: int16(y)}})
 		}
 	}
 }
@@ -88,6 +88,9 @@ func main() {
 	var mockFrameBuffer image.Image
 	// get first image
 	mockFrameBuffer, err = frame.NewImage(ctx, image.Rect(0, 0, windowWidth, windowHeight))
+	if err != nil {
+		fatalError(err)
+	}
 	handleExposeEvent(ctx, X, wid, mockFrameBuffer)
 	for {
 		select {
@@ -97,7 +100,11 @@ func main() {
 			if frame.GlobalPage.PhotoIndex >= len(frame.GlobalPhotoList) {
 				frame.GlobalPage.PhotoIndex = 0
 			}
-			mockFrameBuffer = frame.NewImage(ctx, image.Rect(0, 0, windowWidth, windowHeight))
+			mockFrameBuffer, err = frame.NewImage(ctx, image.Rect(0, 0, windowWidth, windowHeight))
+			if err != nil {
+				log.Println(err)
+				continue
+			}
 			handleExposeEvent(ctx, X, wid, mockFrameBuffer)
 			// drain the ticker channel
 			for len(ticker.C) > 0 {

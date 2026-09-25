@@ -17,7 +17,7 @@ import (
 	_ "embed"
 	_ "image/png"
 
-	"codeberg.org/hum3/gophoto/internal/frame"
+	"git.bytestone.uk/hum3/gophoto/internal/frame"
 )
 
 func main() {

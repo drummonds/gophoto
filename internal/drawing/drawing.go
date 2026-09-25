@@ -5,7 +5,7 @@ import (
 	"image/color"
 	_ "net/http/pprof"
 
-	"codeberg.org/hum3/gophoto/internal/fbimage"
+	"git.bytestone.uk/hum3/gophoto/internal/fbimage"
 
 	_ "embed"
 	_ "image/png"
@@ -94,24 +94,16 @@ func ScaleImageInside(bounds image.Rectangle, maxW, maxH int) image.Rectangle {
 // - maxW and maxH is frame size needs to be mapped to
 // - anchor which side of picture is to be anchored (might be better as a point)
 func ScaleImageOuter(bounds image.Rectangle, target, clip image.Point) image.Rectangle {
-	imgW := bounds.Max.X
-	imgH := bounds.Max.Y
-	// Ratio of screen to image, <1 means reduce image
-	ratioH := float64(target.Y) / float64(imgH)
-	ratioW := float64(target.X) / float64(imgW)
-	var ratio float64
+	imgW := bounds.Dx()
+	imgH := bounds.Dy()
+	// Ratio of screen to image, <1 means reduce image. Take the larger
+	// ratio so the scaled image covers the target on both axes.
+	ratio := max(float64(target.Y)/float64(imgH), float64(target.X)/float64(imgW))
 	scaledW := int(ratio * float64(imgW))
 	scaledH := int(ratio * float64(imgH))
-	top := 0
-	left := 0
-	switch {
-	case ratioH > ratioW: // Scaling to expand width
-		ratio = ratioH
-		left += clip.X + (imgW-scaledW)/2
-	case ratioW > ratioH: // Scaling to expand height
-		ratio = ratioW
-		top += clip.Y + (imgH-scaledH)/2
-	}
+	// Centre the overflowing axis on the target, then apply the clip offset
+	left := clip.X + (target.X-scaledW)/2
+	top := clip.Y + (target.Y-scaledH)/2
 	return image.Rect(left, top, scaledW+left, scaledH+top)
 }
 

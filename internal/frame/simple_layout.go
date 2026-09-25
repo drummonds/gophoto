@@ -10,8 +10,8 @@ import (
 	_ "embed"
 	_ "image/png"
 
-	"codeberg.org/hum3/gophoto/internal/drawing"
-	"codeberg.org/hum3/gophoto/internal/panel"
+	"git.bytestone.uk/hum3/gophoto/internal/drawing"
+	"git.bytestone.uk/hum3/gophoto/internal/panel"
 )
 
 // gokrazy

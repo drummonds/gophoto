@@ -11,9 +11,9 @@ import (
 	"os"
 	"time"
 
+	"git.bytestone.uk/hum3/gophoto/internal/drawing"
+	"git.bytestone.uk/hum3/gophoto/internal/panel"
 	"github.com/disintegration/gift"
-	"codeberg.org/hum3/gophoto/internal/drawing"
-	"codeberg.org/hum3/gophoto/internal/panel"
 	"github.com/drummonds/photoprism-go-api/api"
 	"golang.org/x/image/draw"
 )

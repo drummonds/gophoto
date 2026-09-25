@@ -18,12 +18,12 @@ import (
 	"os/signal"
 	"time"
 
-	"codeberg.org/hum3/gophoto/internal/console"
-	"codeberg.org/hum3/gophoto/internal/drawing"
-	"codeberg.org/hum3/gophoto/internal/fb"
-	"codeberg.org/hum3/gophoto/internal/fbimage"
-	"codeberg.org/hum3/gophoto/internal/frame"
-	"codeberg.org/hum3/gophoto/internal/web"
+	"git.bytestone.uk/hum3/gophoto/internal/console"
+	"git.bytestone.uk/hum3/gophoto/internal/drawing"
+	"git.bytestone.uk/hum3/gophoto/internal/fb"
+	"git.bytestone.uk/hum3/gophoto/internal/fbimage"
+	"git.bytestone.uk/hum3/gophoto/internal/frame"
+	"git.bytestone.uk/hum3/gophoto/internal/web"
 	"github.com/go-ping/ping"
 
 	_ "embed"

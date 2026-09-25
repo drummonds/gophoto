@@ -8,9 +8,9 @@ import (
 	_ "image/png"
 	"log"
 
+	"git.bytestone.uk/hum3/gophoto/internal/frame"
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
-	"codeberg.org/hum3/gophoto/internal/frame"
 	"golang.org/x/image/draw"
 )
 
@@ -30,7 +30,7 @@ func handleExposeEvent(X *xgb.Conn, wid xproto.Window, img image.Image) {
 			r, g, b, _ := c.RGBA()
 			color := (r >> 8 << 16) | (g >> 8 << 8) | (b >> 8)
 			xproto.ChangeGC(X, gc, xproto.GcForeground, []uint32{uint32(color)})
-			xproto.PolyPoint(X, xproto.CoordModeOrigin, xproto.Drawable(wid), gc, []xproto.Point{{int16(x), int16(y)}})
+			xproto.PolyPoint(X, xproto.CoordModeOrigin, xproto.Drawable(wid), gc, []xproto.Point{{X: int16(x), Y: int16(y)}})
 		}
 	}
 }

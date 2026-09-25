@@ -27,7 +27,7 @@ import (
 	"image/draw"
 	"unsafe"
 
-	"codeberg.org/hum3/gophoto/internal/fbimage"
+	"git.bytestone.uk/hum3/gophoto/internal/fbimage"
 	"golang.org/x/sys/unix"
 )
 

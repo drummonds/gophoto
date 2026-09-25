@@ -15,7 +15,7 @@ import (
 	_ "embed"
 	_ "image/png"
 
-	"codeberg.org/hum3/gophoto/internal/frame"
+	"git.bytestone.uk/hum3/gophoto/internal/frame"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 	pf.SetupFullStaticImage()
 
 	// Copy intermediate buffer to frame buffer
-	pf.Render()
+	pf.RenderPanels()
 	draw.Draw(mockFrameBuffer, pf.Bounds, pf.Buffer, image.Point{}, draw.Src)
 	// Encode frame buffer as PNG and save
 	f, _ := os.Create("framebuffer.png")
