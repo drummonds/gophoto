@@ -6,20 +6,62 @@ vars:
   GOK_NAME: hello
 
 tasks:
-
-  gok_add:
+  fmt:
+    desc: Format Go source code
     cmds:
-      - gok add -i {{.GOK_NAME}} github.com/drummonds/gophoto
-      # - gok add -i {{.GOK_NAME}} /home/hum3/minor_projects/gophoto
+      - go fmt ./...
 
-  update:
+  vet:
+    desc: Run Go vet
     cmds:
-      - CGO_ENABLED=0 GOARCH=arm64 gok -i {{.GOK_NAME}} update
+      - go vet ./...
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test ./...
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run ./...
+
+  check:
+    desc: Run fmt, vet, and test
+    cmds:
+      - task: fmt
+      - task: vet
+      - task: test
 
   local:
+    desc: Run gophoto on this machine's frame buffer
     cmds:
       - go run .
 
-  build:
+  gok:add:
+    desc: Add gophoto to the gokrazy instance
     cmds:
-      - CGO_ENABLED=0 GOARCH=arm64 gok -i hello overwrite --full x.img --target_storage_bytes=1258299392
+      - gok add -i {{.GOK_NAME}} git.bytestone.uk/hum3/gophoto
+
+  gok:update:
+    desc: Rebuild and push the gokrazy instance over the network
+    cmds:
+      - CGO_ENABLED=0 GOARCH=arm64 gok -i {{.GOK_NAME}} update
+
+  gok:image:
+    desc: Write a full gokrazy image to x.img
+    cmds:
+      - CGO_ENABLED=0 GOARCH=arm64 gok -i {{.GOK_NAME}} overwrite --full x.img --target_storage_bytes=1258299392
+
+  docs:build:
+    desc: Build documentation (markdown to HTML)
+    cmds:
+      - task-plus md2html --file index.md --dst docs
+      - task-plus md2html --file README.md --dst docs
+      - task-plus md2html --file CHANGELOG.md --dst docs
+      - task-plus md2html --file ROADMAP.md --dst docs
+
+  clean:
+    desc: Remove generated files
+    cmds:
+      - rm -f docs/*.html x.img

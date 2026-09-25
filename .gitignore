@@ -19,3 +19,11 @@
 
 # Go workspace file
 go.work
+
+# Generated
+docs/*.html
+x.img
+framebuffer.png
+.task
+.tp-release-comment
+task-plus.local.yaml

@@ -1,3 +1,13 @@
 remotes:
-  - origin
-  - github
+  - name: origin
+    forge: forgejo
+    token_env: BYTESTONE_FORGEJO_TOKEN
+  - name: github
+    forge: github
+    token_env: GITHUB_TOKEN
+release_remote: origin
+pages_build:
+  - task docs:build
+pages_deploy:
+  - type: rsync
+    site: gophoto
