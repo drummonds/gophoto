@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-25
+
+ - Lint clean; lint runs in task check
+
 ### Changed
 - `task check` now runs golangci-lint; all previous lint findings fixed
 - `PictureFrame.AddPanel` and `RenderPanels` no longer return an error (they could not fail)
