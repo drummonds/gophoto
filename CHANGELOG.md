@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- `task check` now runs golangci-lint; all previous lint findings fixed
+- `PictureFrame.AddPanel` and `RenderPanels` no longer return an error (they could not fail)
+
+### Removed
+- Stale `gophoto.go.old` and duplicate `LICENSE2`
+
 ## [0.1.0] - 2026-09-25
 
  - First tagged release: module path moved to git.bytestone.uk, build fixed, docs published

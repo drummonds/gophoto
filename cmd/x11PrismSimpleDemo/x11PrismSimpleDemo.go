@@ -6,7 +6,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"image"
 	_ "image/png"
 	"log"
@@ -65,7 +64,7 @@ func NewX(width, height int) (*xgb.Conn, xproto.Window, xproto.Atom, xproto.Atom
 }
 
 func fatalError(err error) {
-	log.Println(fmt.Errorf("Fatal error - won't return.\n%+v", err))
+	log.Printf("fatal error, exiting in 30s: %+v", err)
 	time.Sleep(30 * time.Second)
 	log.Fatal(err)
 }

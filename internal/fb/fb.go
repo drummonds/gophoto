@@ -43,20 +43,20 @@ func Open(dev string) (*Device, error) {
 		return nil, fmt.Errorf("open %s: %v", dev, err)
 	}
 	if int(uintptr(fd)) != fd {
-		unix.Close(fd)
+		_ = unix.Close(fd)
 		return nil, errors.New("fd overflows")
 	}
 	d := &Device{Fd: uintptr(fd)}
 
 	_, _, eno := unix.Syscall(unix.SYS_IOCTL, d.Fd, FBIOGET_FSCREENINFO, uintptr(unsafe.Pointer(&d.FInfo)))
 	if eno != 0 {
-		unix.Close(fd)
+		_ = unix.Close(fd)
 		return nil, fmt.Errorf("FBIOGET_FSCREENINFO: %v", eno)
 	}
 
 	d.mmap, err = unix.Mmap(fd, 0, int(d.FInfo.Smem_len), unix.PROT_READ|unix.PROT_WRITE, unix.MAP_SHARED)
 	if err != nil {
-		unix.Close(fd)
+		_ = unix.Close(fd)
 		return nil, fmt.Errorf("mmap: %v", err)
 	}
 	return d, nil
@@ -80,7 +80,8 @@ func (d *Device) Image() (draw.Image, error) {
 	// TODO: select the correct stride and implementation not only based on bpp,
 	// but also on the offsets of the pixels.
 
-	if vinfo.Bits_per_pixel == 32 {
+	switch vinfo.Bits_per_pixel {
+	case 32:
 		// The Linux efifb driver typically defaults to 32 bpp.
 
 		virtual := image.Rect(0, 0, int(vinfo.Xres_virtual), int(vinfo.Yres_virtual))
@@ -98,7 +99,7 @@ func (d *Device) Image() (draw.Image, error) {
 			Stride: stride,
 			Rect:   visual,
 		}, nil
-	} else if vinfo.Bits_per_pixel == 16 {
+	case 16:
 		// The Raspberry Pi vc4drmfb does not offer 32 bpp, and cannot be
 		// reconfigured at runtime.
 
@@ -123,14 +124,13 @@ func (d *Device) Image() (draw.Image, error) {
 				Stride: stride,
 				Rect:   visual,
 			}, nil
-		} else {
-			return &fbimage.BGR565{
-				Pix:    d.mmap,
-				Stride: stride,
-				Rect:   visual,
-			}, nil
 		}
-	} else {
+		return &fbimage.BGR565{
+			Pix:    d.mmap,
+			Stride: stride,
+			Rect:   visual,
+		}, nil
+	default:
 		return nil, fmt.Errorf("%d bits per pixel unsupported", vinfo.Bits_per_pixel)
 	}
 }

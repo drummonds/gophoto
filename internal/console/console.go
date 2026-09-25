@@ -19,13 +19,13 @@ func nextFreeConsole() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer f.Close()
 	free, err := unix.IoctlGetInt(int(f.Fd()), linuxvt.VT_OPENQRY)
+	cerr := f.Close()
 	if err != nil {
 		return 0, fmt.Errorf("VT_OPENQRY: %v", err)
 	}
-	if err := f.Close(); err != nil {
-		return 0, err
+	if cerr != nil {
+		return 0, cerr
 	}
 	return free, nil
 }
@@ -35,11 +35,12 @@ func disallocateConsole(num int) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	if err := unix.IoctlSetInt(int(f.Fd()), linuxvt.VT_DISALLOCATE, num); err != nil {
+	err = unix.IoctlSetInt(int(f.Fd()), linuxvt.VT_DISALLOCATE, num)
+	cerr := f.Close()
+	if err != nil {
 		return fmt.Errorf("VT_DISALLOCATE(%d): %v", num, err)
 	}
-	return f.Close()
+	return cerr
 }
 
 func handleSwitches(fd uintptr, hdl *Handle) error {

@@ -27,10 +27,11 @@ tasks:
       - golangci-lint run ./...
 
   check:
-    desc: Run fmt, vet, and test
+    desc: Run fmt, vet, lint, and test
     cmds:
       - task: fmt
       - task: vet
+      - task: lint
       - task: test
 
   local:

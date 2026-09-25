@@ -2,7 +2,6 @@ package panel
 
 import (
 	"image"
-	"image/color"
 	"image/draw"
 
 	"github.com/fogleman/gg"
@@ -11,11 +10,8 @@ import (
 
 type PlainPanel struct {
 	// config
-	img      draw.Image
 	Bounds   image.Rectangle
 	W, H     int
-	buffer   *image.RGBA
-	bgcolor  color.RGBA
 	g        *gg.Context
 	Location image.Rectangle // Where panel is to be rendered
 }
@@ -25,8 +21,6 @@ type ImagePanel struct {
 	img      image.Image
 	Bounds   image.Rectangle
 	W, H     int
-	buffer   *image.RGBA
-	bgcolor  color.RGBA
 	g        *gg.Context
 	Location image.Rectangle // Where panel is to be rendered
 }

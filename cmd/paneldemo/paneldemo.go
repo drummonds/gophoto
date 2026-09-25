@@ -9,6 +9,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"log"
 	"os"
 
 	"image/draw"
@@ -31,10 +32,19 @@ func main() {
 	// err = pf.SetupFullPhotoPrism()
 
 	// Copy intermediate buffer to frame buffer
-	pf.RenderPhotoPrism()
-	// pf.Render()
+	if err := pf.RenderPhotoPrism(); err != nil {
+		log.Fatal(err)
+	}
 	draw.Draw(mockFrameBuffer, pf.Bounds, pf.Buffer, image.Point{}, draw.Src)
 	// Encode frame buffer as PNG and save
-	f, _ := os.Create("framebuffer.png")
-	png.Encode(f, mockFrameBuffer)
+	f, err := os.Create("framebuffer.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := png.Encode(f, mockFrameBuffer); err != nil {
+		log.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		log.Fatal(err)
+	}
 }

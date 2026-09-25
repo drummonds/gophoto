@@ -102,8 +102,7 @@ func NewImage(ctx context.Context, bounds image.Rectangle) (image.Image, error) 
 // use channel to slow down the process
 // Once album is exhausted it restarts at the begining
 func FillPhotoIDChan(ctx context.Context) {
-	var albumUid string
-	albumUid = os.Getenv("ALBUM_UID")
+	albumUid := os.Getenv("ALBUM_UID")
 	log.Printf("FillPhotoIDChan start filling photo chan for album %s", albumUid)
 
 	offset := 0
@@ -148,9 +147,7 @@ out:
 // then search for first 10 pictures in that album
 // then retrun that as a list
 func GetPhotoList(ctx context.Context) ([]string, error) {
-	var albumUid string
-
-	albumUid = os.Getenv("ALBUM_UID")
+	albumUid := os.Getenv("ALBUM_UID")
 
 	// Get photos from album
 	photoParams := api.SearchPhotosParams{Count: 20, S: &albumUid}
@@ -159,7 +156,7 @@ func GetPhotoList(ctx context.Context) ([]string, error) {
 		return []string{}, err
 	}
 	if photos.HTTPResponse.StatusCode != 200 {
-		return []string{}, fmt.Errorf("Problem with status %v\n", photos.HTTPResponse.StatusCode)
+		return []string{}, fmt.Errorf("searching photos: status %v", photos.HTTPResponse.StatusCode)
 	}
 	if len(*photos.JSON200) < 1 {
 		return []string{}, fmt.Errorf("no photos to show")
@@ -219,7 +216,7 @@ func GetImage(ctx context.Context) (image.Image, error) {
 			}
 			status := file.HTTPResponse.StatusCode
 			if status != 200 {
-				return blank, fmt.Errorf("Problem with status downloading file %v\n", file.HTTPResponse.StatusCode)
+				return blank, fmt.Errorf("downloading file: status %v", status)
 			}
 			body = file.Body
 		case true: // Download thumbnail
@@ -231,7 +228,7 @@ func GetImage(ctx context.Context) (image.Image, error) {
 			}
 			status := file.HTTPResponse.StatusCode
 			if status != 200 {
-				return blank, fmt.Errorf("Problem with status downloading file %v\n", file.HTTPResponse.StatusCode)
+				return blank, fmt.Errorf("downloading thumbnail: status %v", status)
 			}
 			body = file.Body
 		}
@@ -311,7 +308,7 @@ func (pf *PictureFrame) RenderPhotoPrism() error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }() // read only, close error carries nothing
 
 	// fileInfo, _ := f.Stat()
 	// var size int64 = fileInfo.Size()

@@ -28,12 +28,11 @@ type Panelled interface {
 // This is the structure which holds the screen data.
 type PictureFrame struct {
 	// config
-	Bounds      image.Rectangle
-	scaleFactor float64
-	Buffer      *image.RGBA // This is what is output to the screen via the frame buffer
-	BGColour    color.RGBA
-	panels      []Panelled
-	CropPoint   image.Point
+	Bounds    image.Rectangle
+	Buffer    *image.RGBA // This is what is output to the screen via the frame buffer
+	BGColour  color.RGBA
+	panels    []Panelled
+	CropPoint image.Point
 }
 
 // Create a new picture frame at a defined size, eg defined by browser window
@@ -58,18 +57,16 @@ func (pf *PictureFrame) RepaintBackground() {
 	draw.Draw(pf.Buffer, pf.Bounds, &image.Uniform{pf.BGColour}, image.Point{}, draw.Src)
 }
 
-func (pf *PictureFrame) AddPanel(panel Panelled) error {
+func (pf *PictureFrame) AddPanel(panel Panelled) {
 	pf.panels = append(pf.panels, panel)
-	return nil
 }
 
 // Calls all the child panels to rerender them
-func (pf *PictureFrame) RenderPanels() error {
+func (pf *PictureFrame) RenderPanels() {
 	for _, panel := range pf.panels {
 		// Recreate panel content if changed
 		panel.Render(pf.Buffer)
 		// apply panel content to buffer
 		// pf.picture.Render(pf.buffer, photoRect)
 	}
-	return nil
 }

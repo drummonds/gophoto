@@ -82,7 +82,9 @@ func main() {
 
 	// Copy intermediate buffer to frame buffer
 	pf.RenderPanels()
-	pf.RenderPhotoPrism()
+	if err := pf.RenderPhotoPrism(); err != nil {
+		log.Fatal(err)
+	}
 	draw.Draw(mockFrameBuffer, pf.Bounds, pf.Buffer, image.Point{}, draw.Src)
 
 	for {

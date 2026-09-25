@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -22,12 +23,13 @@ var content embed.FS
 // 	fmt.Fprintf(w, "Hello, %s!", r.URL.Path[1:])
 // }
 
+const helloPage = "<title>FrameBuffer</title><h1>Hello  from gophoto</h1>" +
+	"<img src='static/image/P1120981.png' alt='Chimp' style='width:800px;'>"
+
 func HelloServer(w http.ResponseWriter, r *http.Request) {
-	// MAIN SECTION HTML CODE
-	fmt.Fprintf(w, "")
-	fmt.Fprintf(w, "<h1>Hello  from gophoto</h1>")
-	fmt.Fprintf(w, "<title>FrameBuffer</title>")
-	fmt.Fprintf(w, "<img src='static/image/P1120981.png' alt='Chimp' style='width:800px;'>")
+	if _, err := io.WriteString(w, helloPage); err != nil {
+		log.Printf("hello page: %v", err)
+	}
 }
 
 type Page struct {
@@ -56,10 +58,14 @@ func addFrameBufferInfo(sb *strings.Builder) {
 	sb.WriteString("<p>/dev/fb0 unix.Open</p>")
 	fd, err := unix.Open("/dev/fb0", unix.O_RDWR|unix.O_CLOEXEC, 0)
 	if err != nil {
-		sb.WriteString(fmt.Sprintf("<p>Error opening /dev/fb0: %v</p>", err))
+		fmt.Fprintf(sb, "<p>Error opening /dev/fb0: %v</p>", err)
 		return
 	}
-	defer unix.Close(fd)
+	defer func() {
+		if err := unix.Close(fd); err != nil {
+			fmt.Fprintf(sb, "<p>Error closing /dev/fb0: %v</p>", err)
+		}
+	}()
 
 	if int(uintptr(fd)) != fd {
 		sb.WriteString("<p>Error: fd overflows</p>")
@@ -71,26 +77,26 @@ func addFrameBufferInfo(sb *strings.Builder) {
 	sb.WriteString("<p>Call fb.FBIOGET_FSCREENINFO to get current screen info/p>")
 	_, _, eno := unix.Syscall(unix.SYS_IOCTL, d.Fd, fb.FBIOGET_FSCREENINFO, uintptr(unsafe.Pointer(&d.FInfo)))
 	if eno != 0 {
-		sb.WriteString(fmt.Sprintf("<p>Error getting FBIOGET_FSCREENINFO: %v</p>", eno))
+		fmt.Fprintf(sb, "<p>Error getting FBIOGET_FSCREENINFO: %v</p>", eno)
 		return
 	}
 
 	sb.WriteString("<ul>")
-	sb.WriteString(fmt.Sprintf("<li>Start of frame buffer memory: 0x%x</li>", d.FInfo.Smem_start))
-	sb.WriteString(fmt.Sprintf("<li>Length of frame buffer memory: %d bytes</li>", d.FInfo.Smem_len))
-	sb.WriteString(fmt.Sprintf("<li>Frame buffer type: %d</li>", d.FInfo.Type))
-	sb.WriteString(fmt.Sprintf("<li>Type-dependent flags: %d</li>", d.FInfo.Type_aux))
-	sb.WriteString(fmt.Sprintf("<li>Visual: %d</li>", d.FInfo.Visual))
-	sb.WriteString(fmt.Sprintf("<li>XPanStep: %d</li>", d.FInfo.Xpanstep))
-	sb.WriteString(fmt.Sprintf("<li>YPanStep: %d</li>", d.FInfo.Ypanstep))
-	sb.WriteString(fmt.Sprintf("<li>YWrapStep: %d</li>", d.FInfo.Ywrapstep))
-	sb.WriteString(fmt.Sprintf("<li>Line length: %d bytes</li>", d.FInfo.Line_length))
-	sb.WriteString(fmt.Sprintf("<li>Memory mapped I/O start: 0x%x</li>", d.FInfo.Mmio_start))
-	sb.WriteString(fmt.Sprintf("<li>Memory mapped I/O length: %d bytes</li>", d.FInfo.Mmio_len))
-	sb.WriteString(fmt.Sprintf("<li>Accelerator: %d</li>", d.FInfo.Accel))
-	sb.WriteString(fmt.Sprintf("<li>Capabilities: 0x%x</li>", d.FInfo.Capabilities))
-	sb.WriteString(fmt.Sprintf("<li>Reserved[0]: %d</li>", d.FInfo.Reserved[0]))
-	sb.WriteString(fmt.Sprintf("<li>Reserved[1]: %d</li>", d.FInfo.Reserved[1]))
+	fmt.Fprintf(sb, "<li>Start of frame buffer memory: 0x%x</li>", d.FInfo.Smem_start)
+	fmt.Fprintf(sb, "<li>Length of frame buffer memory: %d bytes</li>", d.FInfo.Smem_len)
+	fmt.Fprintf(sb, "<li>Frame buffer type: %d</li>", d.FInfo.Type)
+	fmt.Fprintf(sb, "<li>Type-dependent flags: %d</li>", d.FInfo.Type_aux)
+	fmt.Fprintf(sb, "<li>Visual: %d</li>", d.FInfo.Visual)
+	fmt.Fprintf(sb, "<li>XPanStep: %d</li>", d.FInfo.Xpanstep)
+	fmt.Fprintf(sb, "<li>YPanStep: %d</li>", d.FInfo.Ypanstep)
+	fmt.Fprintf(sb, "<li>YWrapStep: %d</li>", d.FInfo.Ywrapstep)
+	fmt.Fprintf(sb, "<li>Line length: %d bytes</li>", d.FInfo.Line_length)
+	fmt.Fprintf(sb, "<li>Memory mapped I/O start: 0x%x</li>", d.FInfo.Mmio_start)
+	fmt.Fprintf(sb, "<li>Memory mapped I/O length: %d bytes</li>", d.FInfo.Mmio_len)
+	fmt.Fprintf(sb, "<li>Accelerator: %d</li>", d.FInfo.Accel)
+	fmt.Fprintf(sb, "<li>Capabilities: 0x%x</li>", d.FInfo.Capabilities)
+	fmt.Fprintf(sb, "<li>Reserved[0]: %d</li>", d.FInfo.Reserved[0])
+	fmt.Fprintf(sb, "<li>Reserved[1]: %d</li>", d.FInfo.Reserved[1])
 	sb.WriteString("</ul>")
 
 	var format v4l2_format
@@ -100,11 +106,11 @@ func addFrameBufferInfo(sb *strings.Builder) {
 	sb.WriteString("Lookg at querying format of the frame buffer.  Although this seems to be video capture ")
 	sb.WriteString("it is not a video device.  It is a frame buffer device.  It is used to display graphics in memory ")
 	sb.WriteString("<p>Call fb.FBIOGET_FSCREENINFO to get current screen info/p>")
-	_, _, err = unix.Syscall(unix.SYS_IOCTL, d.Fd, VIDIOC_G_FMT, uintptr(unsafe.Pointer(&format)))
-	if err != nil {
-		sb.WriteString(fmt.Sprintf("<p>Failed to get format: %v</p>", err))
+	_, _, eno = unix.Syscall(unix.SYS_IOCTL, d.Fd, VIDIOC_G_FMT, uintptr(unsafe.Pointer(&format)))
+	if eno != 0 {
+		fmt.Fprintf(sb, "<p>Failed to get format: %v</p>", eno)
 	} else {
-		sb.WriteString(fmt.Sprintf("<p>Successfully got format. Type: %d</p>", format.Type))
+		fmt.Fprintf(sb, "<p>Successfully got format. Type: %d</p>", format.Type)
 	}
 }
 
@@ -140,5 +146,5 @@ func StartWebServer() {
 	// http.HandleFunc("/", index_handler)
 	// http.HandleFunc("/about/", about_handler)
 	// http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
-	http.ListenAndServe(port, nil)
+	log.Fatal(http.ListenAndServe(port, nil))
 }

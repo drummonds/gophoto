@@ -21,7 +21,7 @@ func getImage() image.Image {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }() // read only, close error carries nothing
 
 	rawImg, _, err := image.Decode(file)
 	if err != nil {
